@@ -1,0 +1,6 @@
+# Do not keep anything else except files belonging to this repo.
+*
+!.gitignore
+!docker-compose.yml
+!README.md
+!patches/README.md
