@@ -7,16 +7,23 @@ https://www.drupal.org/contribute
 ````bash
 docker-compose up -d
 ````
-That command will run group of containers in background mode
+That command will run group of containers in background mode. That's all you need.
+If you are using [jwilder/nginx-proxy](https://github.com/jwilder/nginx-proxy) container your site will be available under drupal.dev domain.
+If you are not using nginx-proxy - start using it. It's really small and cool container which help you sharing port 80 across containers.
+If you don't want to install anything else - check port expanded by drupal container.
+
+
 
 ## Usefull commands
 
-Check ports map:
+Check ports exposed by containers:
+
 ````bash
 docker-compose port
 ````
 
-See docker provision logs: 
+See logs for containers: 
+
 ````bash
 docker-compose logs
 ````
@@ -47,3 +54,16 @@ chmod +x /usr/local/bin/docker-compose
 ## Configuration
 
 Edit docker-compose.yml file to change default settings (like Drupal 7/8 version). You will find most of it under [drupal] container specification.
+If you want to use blackfire profiling tool you will have replace DEV_MODULE value from XDEBUG to BLACKFIRE
+
+## Known issues
+If you don't have /drupal folder, new one will be created for you and git will clone drupal core into that folder. But it will be done from inside of container. So all files will be owned by root, not your host user. You have to recursively change ownership of /drupal folder and assign it to your user:
+
+````
+chown -R <username> drupal
+````
+
+Do it from Docker host (don't do that while you are inside a container) and be in the parent to drupal directory in that time.
+
+If you are using PHPStorm, disable 'safe write' setting (PHPStorm likes to mess up with file ownership).
+

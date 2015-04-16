@@ -1,16 +1,17 @@
 # @file
-# This is a simple YAML file which will setup for you complete environment
-# to contribute to Drupal project. You can customize this file in several places
+# This is simple YAML file which will configure for you full LAMP stack, everything
+# you need to contribute to Drupal project. You can customize this file in several places
 # to specify some personal preferences.
 #
 # @author
 # zaporylie <jakub@piaseccy.pl>
+# drupal.org/u/zaporylie
 
 # Data-only container
 #
 # This is a container without any running process. Will be stooped right after
-# creation. As long as you won't delete it it will hold mysql data for you
-# (even if mysql service will be dead).
+# creation. As long as you won't delete it, it will hold mysql data for you
+# (even if mysql service will be killed).
 datamysql:
   # We don't want to waist space on your disk so instead of having new, small
   # container (like busybox) let's use the same image as we are using for mysql
@@ -25,7 +26,7 @@ datamysql:
 #
 # This is another container without any process involved. Will hold files in
 # strict structure. You can mount more than only one volume but /app is required
-# if you want to have drupal folder accesible from host.
+# right now if you want to have drupal folder accesible from your host.
 datadrupal:
   # @see https://registry.hub.docker.com/u/zaporylie/drupal-dev
   # @see https://registry.hub.docker.com/u/zaporylie/drupal
@@ -37,6 +38,23 @@ datadrupal:
   entrypoint: /bin/echo
   # Display "APP data-only container" message if container will be started
   command: APP data-only container
+
+# Blackfire container to profile Drupal extreamly easily.
+#
+# Container will run blackfire container in deamon mode so it can be linked into
+# drupal container.
+# See more about blackfire on blackfire.io
+#
+# If you want to use blackfire profiling tools instead of xdebug - replace value for DEV_MODULE
+# variable (in drupal service) to BLACKFIRE
+blackfire:
+  # @see https://registry.hub.docker.com/u/blackfire/blackfire/
+  image: blackfire/blackfire
+  # Configure it via env variables. You will find all credits under your blackfire.io profile.
+  environment:
+    BLACKFIRE_SERVER_ID: put-id-here
+    BLACKFIRE_SERVER_TOKEN: put-token-here
+
 
 # MySQL process container
 #
@@ -74,8 +92,11 @@ drupal:
     # First [mysql] is name of deamon container, second <mysql> is required by
     # application. If you want to change it, set MYSQL_HOST_NAME as well.
     - mysql:mysql
+    # Link to blackfire container if you want to profile Drupal.
+    - blackfire:blackfire
   environment:
     # @see https://registry.hub.docker.com/u/zaporylie/drupal
+    # @see https://registry.hub.docker.com/u/zaporylie/drupal-dev
     DRUPAL_MAJOR_VERSION: 8
     DRUPAL_DOWNLOAD_METHOD: git
     DRUPAL_GIT_BRANCH: 8.0.x
@@ -87,10 +108,14 @@ drupal:
     DRUPAL_SUBDIR: default
     METHOD: auto
     MYSQL_HOST_NAME: mysql
+    # Available values:
+    # - XDEBUG
+    # - BLACKFIRE
+    DEV_MODULE: BLACKFIRE
     #
     # NGINX PROXY RELATED VARIABLES
     # @see https://github.com/jwilder/nginx-proxy
-    VIRTUAL_HOST: drupal-dev.*
+    VIRTUAL_HOST: drupal.dev
   # These are ports which will be exposed on docker-compose up and mapped to
   # available ports on host. You can lock host port, ex. 22:42222 (ssh will be
   # available on port 42222 from outside of container).
