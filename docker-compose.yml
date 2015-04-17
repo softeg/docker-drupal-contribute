@@ -111,7 +111,7 @@ drupal:
     # Available values:
     # - XDEBUG
     # - BLACKFIRE
-    DEV_MODULE: BLACKFIRE
+    DEV_MODULE: XDEBUG
     #
     # NGINX PROXY RELATED VARIABLES
     # @see https://github.com/jwilder/nginx-proxy
